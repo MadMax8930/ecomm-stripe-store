@@ -4,6 +4,7 @@ import { z } from "zod";
 import db from "@/db/db";
 import fs from "fs/promises";
 import { redirect } from "next/navigation";
+import { File } from "buffer";
 
 const fileSchema = z.instanceof(File, { message: "Required" })
 const imageSchema = fileSchema.refine(file => file.size === 0 || file.type.startsWith("image/"))
@@ -16,7 +17,7 @@ const addSchema = z.object({
    image: imageSchema.refine(file => file.size > 0, "Required")
 })
 
-export async function addProduct(formData: FormData) {
+export async function addProduct(prevState: unknown, formData: FormData) {
    // console.log(formData)
    const result = addSchema.safeParse(Object.fromEntries(formData.entries()))
    if (result.success === false) {
@@ -30,16 +31,19 @@ export async function addProduct(formData: FormData) {
    await fs.writeFile(filePath, Buffer.from(await data.file.arrayBuffer()))
 
    await fs.mkdir("public/products", { recursive: true })
-   const imagePath = `/products/${crypto.randomUUID()}-${data.image.name}`
-   await fs.writeFile(`public${imagePath}`, Buffer.from(await data.image.arrayBuffer()))
+   const imagePath = `public/products/${crypto.randomUUID()}-${data.image.name}`
+   await fs.writeFile(imagePath, Buffer.from(await data.image.arrayBuffer()))
 
-   await db.product.create({ data: {
-      name: data.name,
-      description: data.description,
-      priceInCents: data.priceInCents,
-      filePath,
-      imagePath
-   }})
+   await db.product.create({ 
+      data: {
+        isAvailableForPurchase: false,
+        name: data.name,
+        description: data.description,
+        priceInCents: data.priceInCents,
+        filePath,
+        imagePath
+      }
+   })
 
    redirect("/admin/products")
 }
