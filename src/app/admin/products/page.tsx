@@ -1,7 +1,7 @@
 import PageHeader from "@/components/PageHeader";
 import { ActiveToggleDropdownItem, DeleteDropdownItem } from "@/components/ProductActions";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import db from "@/db/db";
 import { formatCurrency, formatNumber } from "@/lib/formatters";
@@ -57,11 +57,11 @@ async function ProductsTable() {
                      {product.isAvailableForPurchase ? 
                         <>
                           <span className="sr-only">Available</span>
-                          <CheckCircle2/>
+                          <CheckCircle2 />
                         </> :
                         <>
                           <span className="sr-only">Unavailable</span>
-                          <XCircle/>
+                          <XCircle className="stroke-destructive" />
                         </>}
                   </TableCell>
                   <TableCell>{product.name}</TableCell>
@@ -81,6 +81,7 @@ async function ProductsTable() {
                               <Link href={`/admin/products/${product.id}/edit`}>Edit</Link>
                            </DropdownMenuItem>
                            <ActiveToggleDropdownItem id={product.id} isAvailableForPurchase={product.isAvailableForPurchase} />
+                           <DropdownMenuSeparator />
                            <DeleteDropdownItem id={product.id} disabled={product._count.orders > 0} />
                         </DropdownMenuContent>
                      </DropdownMenu>
