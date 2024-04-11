@@ -1,4 +1,4 @@
-## Modular E-commerce Stripe Project with [`Next.js`]
+## Modular E-commerce Stripe [`Next.js`] Project
 Node version 18.17.0
 
 ### 🚀 Dependencies:
@@ -15,4 +15,4 @@ npm i --save-dev ts-node prisma zod resend react-email @react-email/components s
 [SQLite](https://www.sqlite.org) for backend storage
 [Stripe](https://stripe.com) for payment process
 [Zod](https://zod.dev/) for TS schema validation
-[Resend](https://resend.com) for more sending emails
+[Resend](https://resend.com) for sending emails
