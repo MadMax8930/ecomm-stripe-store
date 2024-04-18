@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { DiscountCodeType } from "@prisma/client"
 import { getDiscountedAmount } from "@/lib/discountCodeHelpers"
+import { createPaymentIntent } from "@/_actions/orders"
 
 type CheckoutFormProps = {
    product: {
@@ -27,12 +28,11 @@ type CheckoutFormProps = {
      discountAmount: number
      discountType: DiscountCodeType
    }
-   clientSecret: string
 }
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLIC_KEY as string)
 
-export function CheckoutForm({ product, clientSecret, discountCode }: CheckoutFormProps) {
+export function CheckoutForm({ product, discountCode }: CheckoutFormProps) {
    const amount = discountCode == null ? product.priceInCents : getDiscountedAmount(discountCode, product.priceInCents)
    const isDiscounted = amount !== product.priceInCents
 
@@ -55,8 +55,8 @@ export function CheckoutForm({ product, clientSecret, discountCode }: CheckoutFo
           </div>
         </div>
       </div>
-      <Elements options={{ clientSecret }} stripe={stripePromise}>
-        <Form priceInCents={product.priceInCents} productId={product.id} discountCode={discountCode} />
+      <Elements options={{ amount, mode: "payment", currency: "usd" }} stripe={stripePromise}>
+        <Form priceInCents={amount} productId={product.id} discountCode={discountCode} />
       </Elements>
     </div>
   )
@@ -81,11 +81,20 @@ function Form({ priceInCents, productId, discountCode }: { priceInCents: number,
 
     setIsLoading(true)
 
-    // Check for existing order
+    // Making sure form submits properly
 
-    const orderExists = await userOrderExists(email, productId)
-    if (orderExists) { 
-      setErrorMessage("You have already purchased this product. Try downloading it from the My Orders page")
+    const formSubmit = await elements.submit()
+    if (formSubmit.error != null) {
+      setErrorMessage(formSubmit.error.message)
+      setIsLoading(false)
+      return
+    }
+
+    // Creating a payment on the server directly before we submit to make sure that the coupon code is still valid
+    
+    const paymentIntent = await createPaymentIntent(email, productId, discountCode?.id)
+    if (paymentIntent.error != null) { 
+      setErrorMessage(paymentIntent.error)
       setIsLoading(false)
       return
     }
@@ -95,6 +104,7 @@ function Form({ priceInCents, productId, discountCode }: { priceInCents: number,
     stripe
       .confirmPayment({
         elements,
+        clientSecret: paymentIntent.clientSecret,
         confirmParams: {
           return_url: `${process.env.NEXT_PUBLIC_SERVER_URL}/stripe/purchase-success`,
         },
