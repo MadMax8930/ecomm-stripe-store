@@ -7,7 +7,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Elements, LinkAuthenticationElement, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js"
 import { loadStripe } from "@stripe/stripe-js"
 import { formatCurrency, formatDiscountCode } from "@/lib/formatters"
-import { userOrderExists } from "@/app/_actions/orders"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
