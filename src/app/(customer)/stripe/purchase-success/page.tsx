@@ -3,7 +3,6 @@ import Link from "next/link"
 import Image from "next/image"
 import Stripe from "stripe"
 import { Button } from "@/components/ui/button"
-import { formatCurrency } from "@/lib/formatters"
 import { notFound } from "next/navigation"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string)
@@ -27,9 +26,6 @@ export default async function SuccessPage({ searchParams }: { searchParams: { pa
           <Image src={product.imagePath.slice(6)} fill alt={product.name} className="object-cover" />
         </div>
         <div>
-          <div className="text-lg">
-            {formatCurrency(product.priceInCents / 100)}
-          </div>
           <h1 className="text-2xl font-bold">{product.name}</h1>
           <div className="line-clamp-3 text-muted-foreground">
             {product.description}
