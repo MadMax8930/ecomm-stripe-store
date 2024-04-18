@@ -4,7 +4,7 @@ import { DeleteDropDownItem } from "@/components/OrderActions"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { formatCurrency } from "@/lib/formatters"
-import { MoreVertical } from "lucide-react"
+import { Minus, MoreVertical } from "lucide-react"
  
 function getOrders() {
    return db.order.findMany({
@@ -13,6 +13,7 @@ function getOrders() {
        pricePaidInCents: true,
        product: { select: { name: true } },
        user: { select: { email: true } },
+       discountCode: { select: { code: true } },
      },
      orderBy: { createdAt: "desc" },
    })
@@ -39,6 +40,7 @@ export default function OrdersPage() {
            <TableHead>Product</TableHead>
            <TableHead>Customer</TableHead>
            <TableHead>Price Paid</TableHead>
+           <TableHead>Coupon</TableHead>
            <TableHead className="w-0">
              <span className="sr-only">Actions</span>
            </TableHead>
@@ -51,6 +53,9 @@ export default function OrdersPage() {
              <TableCell>{order.user.email}</TableCell>
              <TableCell>
                {formatCurrency(order.pricePaidInCents / 100)}
+             </TableCell>
+             <TableCell>
+               {order.discountCode == null ? <Minus /> : order.discountCode.code}
              </TableCell>
              <TableCell className="text-center">
                <DropdownMenu>
